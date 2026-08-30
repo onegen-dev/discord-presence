@@ -130,6 +130,8 @@ namespace discord {
         // Shutdown must not reopen a dead IPC connection.
         m_initialized = false;
         Connection::destroyInstance();
+
+        return *this;
     }
 
     RPCManager& RPCManager::update() noexcept {
