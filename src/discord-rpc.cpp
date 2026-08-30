@@ -115,19 +115,21 @@ namespace discord {
             return *this;
         }
 
-        // Stop accepting updates before stopping the worker.  In particular,
-        // shutdown must not reopen a dead IPC connection.
-        m_initialized = false;
-
         if (m_ioWorker) {
             delete m_ioWorker;
             m_ioWorker = nullptr;
         }
 
-        this->clearPresence();
+        // Send a final empty-presence frame if the pipe is up.
+        if (Connection::get().isOpen()) {
+            this->clearPresence();
+            this->update();
+        }
+        
+        // Stop accepting updates before stopping the worker.
+        // Shutdown must not reopen a dead IPC connection.
+        m_initialized = false;
         Connection::destroyInstance();
-
-        return *this;
     }
 
     RPCManager& RPCManager::update() noexcept {
