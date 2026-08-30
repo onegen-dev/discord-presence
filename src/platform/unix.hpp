@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <cstdio>
 
 namespace discord::platform {
     inline size_t getProcessID() noexcept {
@@ -76,14 +77,20 @@ namespace discord::platform {
 
             for (auto& dir : getCandidatePaths()) {
                 for (int i = 0; i < 10; ++i) {
-                    fmt::format_to(m_address.sun_path, "{}/discord-ipc-{}", dir, i);
-                    if (::connect(m_socket, reinterpret_cast<sockaddr*>(&m_address), sizeof(m_address)) == 0) {
-                        m_isOpen = true;
-                        return true;
+                    std::snprintf(m_address.sun_path,
+                                  sizeof(m_address.sun_path),
+                                  "%s/discord-ipc-%d", dir.c_str(), i);
+                    if (::connect(m_socket,
+                                  reinterpret_cast<sockaddr*>(&m_address),
+                                  sizeof(m_address))
+                        == 0) {
+                            m_isOpen = true;
+                            return true;
                     }
                 }
             }
 
+            ::close(m_socket);
             m_socket = -1;
             return false;
         }

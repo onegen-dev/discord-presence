@@ -95,13 +95,17 @@ namespace discord {
             return *this;
         }
 
-        m_ioWorker = new(std::nothrow) IOWorker();
-        if (m_ioWorker) {
-            m_ioWorker->start();
-        }
+        // Start a fresh reconnect cycle after a manual reinitialization.
+        m_nextConnect = std::chrono::system_clock::now();
+        Backoff::get().reset();
 
         m_processID = platform::getProcessID();
         m_initialized = true;
+
+        m_ioWorker = new (std::nothrow) IOWorker();
+        if (m_ioWorker) {
+            m_ioWorker->start();
+        }
 
         return *this;
     }
@@ -116,11 +120,14 @@ namespace discord {
             m_ioWorker = nullptr;
         }
 
-        this->clearPresence();
-        this->update();
+        // Send a final empty-presence frame if the pipe is up.
+        if (Connection::get().isOpen()) {
+            this->clearPresence();
+            this->update();
+        }
 
-        Connection::destroyInstance();
         m_initialized = false;
+        Connection::destroyInstance();
 
         return *this;
     }
