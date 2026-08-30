@@ -91,7 +91,7 @@ namespace discord {
     }
 
     RPCManager& RPCManager::initialize() noexcept {
-        if (m_initialized) {
+        if (m_initialized.load()) {
             return *this;
         }
 
@@ -100,7 +100,7 @@ namespace discord {
         Backoff::get().reset();
 
         m_processID = platform::getProcessID();
-        m_initialized = true;
+        m_initialized.store(true);
 
         m_ioWorker = new (std::nothrow) IOWorker();
         if (m_ioWorker) {
@@ -111,7 +111,7 @@ namespace discord {
     }
 
     RPCManager& RPCManager::shutdown() noexcept {
-        if (!m_initialized) {
+        if (!m_initialized.load()) {
             return *this;
         }
 
@@ -126,14 +126,14 @@ namespace discord {
             this->update();
         }
 
-        m_initialized = false;
+        m_initialized.store(false);
         Connection::destroyInstance();
 
         return *this;
     }
 
     RPCManager& RPCManager::update() noexcept {
-        if (!m_initialized) {
+        if (!m_initialized.load()) {
             return *this;
         }
 

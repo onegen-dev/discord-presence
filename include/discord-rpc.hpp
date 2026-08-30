@@ -122,7 +122,7 @@ namespace discord {
         std::function<void(User const&)> m_onJoinRequest;
 
         // State
-        bool m_initialized = false;
+        std::atomic<bool> m_initialized = false;
 
         // Internal
         IOWorker* m_ioWorker = nullptr;
