@@ -102,7 +102,7 @@ namespace discord {
         m_processID = platform::getProcessID();
         m_initialized = true;
 
-        m_ioWorker = new(std::nothrow) IOWorker();
+        m_ioWorker = new (std::nothrow) IOWorker();
         if (m_ioWorker) {
             m_ioWorker->start();
         }
@@ -125,9 +125,7 @@ namespace discord {
             this->clearPresence();
             this->update();
         }
-        
-        // Stop accepting updates before stopping the worker.
-        // Shutdown must not reopen a dead IPC connection.
+
         m_initialized = false;
         Connection::destroyInstance();
 

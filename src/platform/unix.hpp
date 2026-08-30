@@ -77,11 +77,15 @@ namespace discord::platform {
 
             for (auto& dir : getCandidatePaths()) {
                 for (int i = 0; i < 10; ++i) {
-                    std::snprintf(m_address.sun_path, sizeof(m_address.sun_path),
+                    std::snprintf(m_address.sun_path,
+                                  sizeof(m_address.sun_path),
                                   "%s/discord-ipc-%d", dir.c_str(), i);
-                    if (::connect(m_socket, reinterpret_cast<sockaddr*>(&m_address), sizeof(m_address)) == 0) {
-                        m_isOpen = true;
-                        return true;
+                    if (::connect(m_socket,
+                                  reinterpret_cast<sockaddr*>(&m_address),
+                                  sizeof(m_address))
+                        == 0) {
+                            m_isOpen = true;
+                            return true;
                     }
                 }
             }
